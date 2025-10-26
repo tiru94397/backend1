@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/server.js",
+    "start": "node dist/server.js"
   },
   "dependencies": {
     "@ai-sdk/perplexity": "^2.0.13",
@@ -22,7 +22,7 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   },
-  "description": "��#\u0000 \u0000v\u0000f\u0000a\u0000i\u0000-\u0000b\u0000a\u0000c\u0000k\u0000e\u0000n\u0000d\u0000\r\u0000 \u0000",
+  "description": "Virtual Factory AI backend",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tiru94397/vfai-tiru.git"
