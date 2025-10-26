@@ -12,45 +12,46 @@ app.use(cors());
 app.use(express.json());
 
 // Health check
-app.get("/api/ollama/status", (_req, res) => {
-  res.json({ status: "ok", message: "Backend is running fine ✅" });
+app.get("/api/perplexity/status", (_req, res) => {
+  res.json({ status: "ok", message: "Perplexity backend is active ✅" });
 });
 
-// Test route
-app.post("/api/ollama/generate-test", (req, res) => {
-  res.json({ test: "Ollama route works!", received: req.body });
-});
+// Main Perplexity AI endpoint
+app.post("/api/perplexity/ask", async (req, res) => {
+  const { prompt } = req.body;
+  if (!prompt) return res.status(400).send("Prompt is required");
 
-// Real AI generation
-interface OllamaResponse {
-  response?: string;
-}
-
-app.post("/api/ollama/generate", async (req, res) => {
   try {
-    const { query } = req.body;
-    if (!query) return res.status(400).json({ error: "Query is required" });
-
-    const ollamaApiUrl = process.env.OLLAMA_URL || "http://127.0.0.1:11434/api/generate";
-
-    const response = await fetch(ollamaApiUrl, {
+    const response = await fetch("https://api.perplexity.ai/chat/completions", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Authorization": `Bearer ${process.env.PERPLEXITY_API_KEY}`,
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
-        model: process.env.OLLAMA_MODEL || "llama3.2:latest",
-        prompt: query,
-        stream: false
-      })
+        model: "sonar",
+        messages: [
+          {
+            role: "system",
+            content: `You are Tiru AI — a friendly, concise AI assistant.
+Always reply with clean, short, human-like text.
+Do not include markdown, JSON, quotes, or extra explanation.`,
+          },
+          { role: "user", content: prompt },
+        ],
+      }),
     });
 
-    const data: OllamaResponse = await response.json();
-    res.json({ completion: data.response || "No response from Ollama" });
+    const data = await response.json();
+    const text = data?.choices?.[0]?.message?.content?.trim() || "No response from Perplexity";
+
+    res.send(text); // ✅ Plain text reply
   } catch (error) {
-    console.error("Ollama generate error:", error);
-    res.status(500).json({ error: "Failed to connect to Ollama" });
+    console.error("Perplexity API error:", error);
+    res.status(500).send("Error connecting to Perplexity API");
   }
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
+  console.log(`🚀 Perplexity backend running at http://localhost:${PORT}`);
 });
